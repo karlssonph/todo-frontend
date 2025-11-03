@@ -355,7 +355,17 @@
                 this.tasks = this.loadTasks();
                 this.currentFilter = 'all';
                 this.editingTaskId = null;
+                this.nextId = this.getNextId();
                 this.init();
+            }
+
+            getNextId() {
+                // Find the highest existing ID and add 1
+                if (this.tasks.length === 0) {
+                    return 1;
+                }
+                const maxId = Math.max(...this.tasks.map(t => t.id || 0));
+                return maxId + 1;
             }
 
             init() {
@@ -402,7 +412,7 @@
                 }
 
                 const task = {
-                    id: Date.now(),
+                    id: this.nextId++,
                     text: text,
                     status: statusSelect.value,
                     createdAt: new Date().toISOString()
@@ -480,9 +490,23 @@
             }
 
             convertLinksToAnchors(text) {
-                // Regular expression to match URLs
-                const urlRegex = /(https?:\/\/[^\s]+)/g;
-                return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+                // First escape the text to prevent XSS
+                const escaped = this.escapeHtml(text);
+                // Then safely convert URLs to links
+                const urlRegex = /(https?:\/\/[^\s<>"]+)/g;
+                return escaped.replace(urlRegex, (match) => {
+                    // Double-check the URL is valid
+                    try {
+                        const url = new URL(match);
+                        if (url.protocol === 'http:' || url.protocol === 'https:') {
+                            // URL is already escaped from escapeHtml, so it's safe
+                            return `<a href="${match}" target="_blank" rel="noopener noreferrer">${match}</a>`;
+                        }
+                    } catch (e) {
+                        // Invalid URL, return as-is
+                    }
+                    return match;
+                });
             }
 
             getStatusClass(status) {
@@ -534,7 +558,7 @@
                     return `
                         <div class="task-item" data-task-id="${task.id}">
                             <div class="task-content">
-                                <div class="task-text">${this.convertLinksToAnchors(this.escapeHtml(task.text))}</div>
+                                <div class="task-text">${this.convertLinksToAnchors(task.text)}</div>
                                 <span class="task-status ${this.getStatusClass(task.status)}">
                                     ${this.getStatusLabel(task.status)}
                                 </span>
