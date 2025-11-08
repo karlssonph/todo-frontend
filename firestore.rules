@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Todos collection - user-specific access with authentication required
+    match /todos/{todoId} {
+      // Only allow authenticated users
+      allow read, write: if request.auth != null;
+      
+      // Users can only read their own todos
+      allow read: if request.auth.uid == resource.data.userId;
+      
+      // Users can only create todos with their own userId
+      allow create: if request.auth.uid == request.resource.data.userId
+                    && isValidTodo(request.resource.data);
+      
+      // Users can only update their own todos
+      allow update: if request.auth.uid == resource.data.userId
+                    && request.auth.uid == request.resource.data.userId
+                    && isValidTodo(request.resource.data);
+      
+      // Users can only delete their own todos
+      allow delete: if request.auth.uid == resource.data.userId;
+    }
+    
+    // Helper function to validate todo data structure
+    function isValidTodo(data) {
+      return data.keys().hasAll(['text', 'status', 'dateCreated', 'comment', 'order', 'tags', 'mentions', 'userId'])
+        && data.text is string
+        && data.text.size() > 0
+        && data.text.size() <= 500
+        && data.status in ['not started', 'in progress', 'on hold', 'completed']
+        && data.dateCreated is string
+        && data.comment is string
+        && data.comment.size() <= 1000
+        && data.order is number
+        && data.order >= 0
+        && data.tags is list
+        && data.tags.size() <= 20
+        && data.mentions is list
+        && data.mentions.size() <= 20
+        && data.userId is string
+        && data.userId == request.auth.uid;
+    }
+  }
+}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { db } from './firebase'
-import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore'
+import { useAuth } from './AuthContext'
 
 type TodoStatus = 'not started' | 'in progress' | 'on hold' | 'completed';
 
@@ -15,9 +16,11 @@ interface Todo {
   tags: string[];
   mentions: string[];
   previousStatus?: TodoStatus;
+  userId: string;
 }
 
 function App() {
+  const { user, loading, signUp, signIn, logout } = useAuth()
   const [todos, setTodos] = useState<Todo[]>([])
   const [inputText, setInputText] = useState('')
   const [filterStatuses, setFilterStatuses] = useState<TodoStatus[]>(['not started', 'in progress', 'on hold', 'completed'])
@@ -35,6 +38,12 @@ function App() {
     return window.matchMedia('(max-width: 768px)').matches
   })
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number>(-1)
+  
+  // Auth form state
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
   
   // Extract tags (#word) from text
   const extractTags = (text: string): string[] => {
@@ -146,7 +155,15 @@ function App() {
 
   // Load todos from Firestore
   useEffect(() => {
-    const q = query(collection(db, 'todos'), orderBy('order', 'asc'))
+    if (!user) {
+      setTodos([])
+      return
+    }
+
+    const q = query(
+      collection(db, 'todos'), 
+      where('userId', '==', user.uid)
+    )
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const todosData: Todo[] = []
       querySnapshot.forEach((doc) => {
@@ -159,13 +176,15 @@ function App() {
           mentions: data.mentions || []
         } as Todo)
       })
+      // Sort by order on the client side
+      todosData.sort((a, b) => a.order - b.order)
       setTodos(todosData)
     })
     return () => unsubscribe()
-  }, [])
+  }, [user])
 
   const addTodo = async () => {
-    if (inputText.trim() !== '') {
+    if (inputText.trim() !== '' && user) {
       const newTodo = {
         text: inputText,
         status: 'not started' as TodoStatus,
@@ -174,7 +193,8 @@ function App() {
         order: todos.length,
         tags: extractTags(inputText),
         mentions: extractMentions(inputText),
-        previousStatus: 'not started' as TodoStatus
+        previousStatus: 'not started' as TodoStatus,
+        userId: user.uid
       }
       await addDoc(collection(db, 'todos'), newTodo)
       setInputText('')
@@ -215,6 +235,21 @@ function App() {
   const updateComment = async (id: string, newComment: string) => {
     const todoRef = doc(db, 'todos', id)
     await updateDoc(todoRef, { comment: newComment })
+  }
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError('')
+    
+    try {
+      if (isSignUp) {
+        await signUp(email, password)
+      } else {
+        await signIn(email, password)
+      }
+    } catch (error: any) {
+      setAuthError(error.message || 'Authentication failed')
+    }
   }
 
   const updateTaskText = async (id: string, newText: string) => {
@@ -422,20 +457,87 @@ function App() {
   // Use original order for drag and drop, sorted order for display when sorted
   const displayTodos = sortBy ? sortedTodos : filteredTodos
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="App">
+        <div className="loading-container">
+          <p>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Not authenticated - show sign in
+  if (!user) {
+    return (
+      <div className="App">
+        <div className="auth-container">
+          <h1>rapid dar bun</h1>
+          <p>A simple, powerful todo manager</p>
+          
+          <form onSubmit={handleAuthSubmit} className="auth-form">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
+              className="auth-input"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+              minLength={6}
+              className="auth-input"
+            />
+            
+            {authError && <p className="auth-error">{authError}</p>}
+            
+            <button type="submit" className="sign-in-btn">
+              {isSignUp ? 'Sign Up' : 'Sign In'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setAuthError('')
+              }}
+              className="toggle-auth-btn"
+            >
+              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  // Authenticated - show app
   return (
     <div className="App">
       <div className="app-header">
         <h1>rapid dar bun</h1>
-        <label className="view-toggle">
-          <span>Simple View</span>
-          <input
-            type="checkbox"
-            checked={isSimpleView}
-            onChange={toggleSimpleView}
-            className="toggle-checkbox"
-          />
-          <span className="toggle-switch"></span>
-        </label>
+        <div className="header-right">
+          <div className="user-info">
+            <span className="user-name">{user.email}</span>
+            <button onClick={logout} className="logout-btn">Sign Out</button>
+          </div>
+          <label className="view-toggle">
+            <span>Simple View</span>
+            <input
+              type="checkbox"
+              checked={isSimpleView}
+              onChange={toggleSimpleView}
+              className="toggle-checkbox"
+            />
+            <span className="toggle-switch"></span>
+          </label>
+        </div>
       </div>
       <div className="todo-input">
         <input
