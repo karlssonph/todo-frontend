@@ -1,0 +1,789 @@
+#root {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #1a1a1a;
+}
+
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  margin-top: 0;
+}
+
+.todo-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.todo-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #3a3a3a;
+  color: white;
+}
+
+.todo-input button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.todo-input button:hover {
+  background-color: #0056b3;
+}
+
+.filters {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.87);
+  font-weight: 500;
+}
+
+.status-checkboxes {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.87);
+  font-weight: 400;
+}
+
+.checkbox-label.all-checkbox {
+  font-weight: 500;
+  padding-right: 12px;
+  border-right: 1px solid #3a3a3a;
+  margin-right: 4px;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #2196F3;
+}
+
+.checkbox-label span {
+  user-select: none;
+}
+
+.filter-group select,
+.filter-group input[type="date"] {
+  padding: 8px 12px;
+  background-color: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.filter-group select:hover,
+.filter-group input[type="date"]:hover {
+  border-color: #4a4a4a;
+}
+
+.clear-filter {
+  padding: 8px 12px;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.clear-filter:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.todo-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.todo-table thead {
+  background-color: #1e1e1e;
+}
+
+.todo-table th {
+  padding: 16px 20px;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  font-size: 14px;
+  border-bottom: 1px solid #2a2a2a;
+  text-transform: capitalize;
+}
+
+.todo-table th.checkbox-column {
+  width: 30px;
+  padding: 16px 4px;
+}
+
+.todo-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.todo-table th.sortable:hover {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  color: #2196F3;
+  font-size: 12px;
+}
+
+.todo-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.todo-table tbody tr {
+  background-color: #1e1e1e;
+  transition: background-color 0.2s;
+  cursor: move;
+}
+
+.todo-table tbody tr:hover {
+  background-color: #252525;
+}
+
+.todo-table tbody tr.dragging {
+  opacity: 0.4;
+  background-color: #2a2a2a;
+}
+
+.todo-table tbody tr.drop-target {
+  border-top: 3px solid #2196F3;
+  background-color: rgba(33, 150, 243, 0.15);
+}
+
+.todo-table tbody tr.status-not-started {
+  border-left: 9px solid #6c757d;
+}
+
+.todo-table tbody tr.status-in-progress {
+  border-left: 9px solid #2196F3;
+  background-color: rgba(33, 150, 243, 0.05);
+}
+
+.todo-table tbody tr.status-in-progress:hover {
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+.todo-table tbody tr.status-on-hold {
+  border-left: 9px solid #ffc107;
+}
+
+.todo-table tbody tr.status-completed {
+  border-left: 9px solid #28a745;
+  opacity: 0.6;
+}
+
+.task-cell {
+  font-weight: 400;
+  min-width: 200px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.87);
+  text-align: left;
+  cursor: pointer;
+}
+
+.task-edit-input {
+  width: 100%;
+  padding: 4px 8px;
+  background-color: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #2196F3;
+  border-radius: 4px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+}
+
+.status-completed .task-cell {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.date-cell {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.status-select {
+  padding: 8px 12px;
+  background-color: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  width: 100%;
+  max-width: 150px;
+}
+
+.status-select:hover,
+.status-select:focus {
+  background-color: #2a2a2a;
+  border-color: #4a4a4a;
+  outline: none;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  background-color: #252525;
+}
+
+.comment-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.delete-btn {
+  background-color: transparent;
+  color: #dc3545;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+  transition: all 0.2s;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #ff0000;
+}
+
+.no-results {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 20px;
+  font-style: italic;
+}
+.area-select {
+  padding: 8px 12px;
+  background-color: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  width: 100%;
+  max-width: 150px;
+}
+
+.area-select:hover,
+.area-select:focus {
+  background-color: #2a2a2a;
+  border-color: #4a4a4a;
+  outline: none;
+}
+
+.follow-up-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tag-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.87);
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.tag-checkbox:hover {
+  background-color: #252525;
+}
+
+.tag-checkbox input[type="checkbox"] {
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  accent-color: #2196F3;
+}
+
+.tag-checkbox span {
+  user-select: none;
+}
+
+.checkbox-cell {
+  width: 30px;
+  padding: 10px 4px;
+  text-align: center;
+}
+
+.complete-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #28a745;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.app-header h1 {
+  margin: 0;
+}
+
+.view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.87);
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.view-toggle:hover {
+  background-color: #252525;
+}
+
+.toggle-checkbox {
+  display: none;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  background-color: #3a3a3a;
+  border-radius: 12px;
+  transition: background-color 0.3s;
+  border: 1px solid #4a4a4a;
+}
+
+.toggle-switch::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  background-color: rgba(255, 255, 255, 0.87);
+  transition: transform 0.3s;
+}
+
+.toggle-checkbox:checked + .toggle-switch {
+  background-color: #2196F3;
+  border-color: #2196F3;
+}
+
+.toggle-checkbox:checked + .toggle-switch::before {
+  transform: translateX(24px);
+}
+
+/* Mobile Responsiveness */
+
+/* Mobile devices (< 768px) */
+@media (max-width: 768px) {
+  .App {
+    padding: 12px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .app-header h1 {
+    font-size: 24px;
+  }
+
+  .view-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .todo-input {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .todo-input input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .todo-input button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .filters {
+    margin: 16px 0;
+  }
+
+  .filter-group label {
+    font-size: 14px;
+  }
+
+  .status-checkboxes {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .checkbox-label {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .todo-table {
+    font-size: 14px;
+  }
+
+  .complete-checkbox {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .checkbox-cell {
+    width: 44px;
+    padding: 8px 4px;
+  }
+
+  .task-cell {
+    min-width: 150px;
+    padding: 12px 8px;
+  }
+
+  .task-edit-input {
+    padding: 8px;
+    font-size: 16px;
+  }
+
+  .status-select,
+  .area-select {
+    padding: 10px;
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .comment-input {
+    padding: 10px;
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .delete-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+
+  .todo-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .todo-table thead,
+  .todo-table tbody,
+  .todo-table tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .todo-table thead {
+    width: calc(100% - 1px);
+  }
+
+  /* Disable drag cursor on mobile */
+  .todo-table tbody tr {
+    cursor: default;
+  }
+}
+
+/* Tablet devices (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .App {
+    padding: 16px;
+  }
+
+  .todo-input input,
+  .todo-input button {
+    font-size: 15px;
+  }
+
+  .status-select,
+  .area-select,
+  .comment-input {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .delete-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Desktop devices (> 1024px) */
+@media (min-width: 1024px) {
+  .App {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* Tags and Mentions Highlighting */
+.tag-highlight {
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.mention-highlight {
+  color: #2196F3;
+  font-weight: 500;
+}
+
+/* Badge Styling */
+.badges-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 32px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tag-badge {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.mention-badge {
+  background-color: rgba(33, 150, 243, 0.15);
+  color: #2196F3;
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.badge-remove {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  margin-left: 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.badge-remove:hover {
+  opacity: 1;
+}
+
+.badge-input {
+  background-color: transparent;
+  border: 1px dashed #3a3a3a;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  outline: none;
+  min-width: 80px;
+  max-width: 120px;
+}
+
+.badge-input:focus {
+  border-color: #4a4a4a;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #2a2a2a;
+}
+
+.badge-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Keyboard Navigation */
+.selected-task {
+  outline: 2px solid #2196F3 !important;
+  outline-offset: -2px;
+  background-color: rgba(33, 150, 243, 0.08) !important;
+}
+
+.selected-task:hover {
+  background-color: rgba(33, 150, 243, 0.12) !important;
+}
+
+/* Task Text Wrapper - Focusable for Tab Navigation */
+.task-text-wrapper {
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: 4px;
+  outline: none;
+  cursor: text;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.task-text-wrapper:focus {
+  background-color: rgba(33, 150, 243, 0.1);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+}
+
+.task-text-wrapper:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Optimized spacing for maximum readable text */
+
+/* Task column - more space for content */
+.task-cell {
+  min-width: 250px;
+  max-width: 400px;
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.task-text-wrapper {
+  padding: 6px 10px;
+  margin: -6px -10px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.task-edit-input {
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  width: 100%;
+}
+
+/* Comment column - generous space */
+.comment-input {
+  min-width: 150px;
+  max-width: 200px;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Compact other columns */
+.status-select {
+  max-width: 120px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.date-cell {
+  min-width: 90px;
+  max-width: 100px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Reduce badge container size */
+.badges-container {
+  min-width: 100px;
+  max-width: 150px;
+}
+
+/* Better row spacing */
+.todo-table tbody tr {
+  height: auto;
+  min-height: 48px;
+}
+
+.todo-table tbody td {
+  vertical-align: middle;
+}
