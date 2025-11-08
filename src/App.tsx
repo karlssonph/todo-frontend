@@ -473,7 +473,7 @@ function App() {
     return (
       <div className="App">
         <div className="auth-container">
-          <h1>rapid dar bun</h1>
+          <h1>rapi.do</h1>
           <p>A simple, powerful todo manager</p>
           
           <form onSubmit={handleAuthSubmit} className="auth-form">
@@ -521,7 +521,7 @@ function App() {
   return (
     <div className="App">
       <div className="app-header">
-        <h1>rapid dar bun</h1>
+        <h1>rapi.do</h1>
         <div className="header-right">
           <div className="user-info">
             <span className="user-name">{user.email}</span>
