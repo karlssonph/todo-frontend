@@ -24,6 +24,9 @@ function App() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [inputText, setInputText] = useState('')
   const [filterStatuses, setFilterStatuses] = useState<TodoStatus[]>(['not started', 'in progress', 'on hold', 'completed'])
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedMentions, setSelectedMentions] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'status' | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
@@ -38,6 +41,8 @@ function App() {
     return window.matchMedia('(max-width: 768px)').matches
   })
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number>(-1)
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false)
+  const [showStatusFilter, setShowStatusFilter] = useState(false)
   
   // Auth form state
   const [isSignUp, setIsSignUp] = useState(false)
@@ -64,6 +69,18 @@ function App() {
     return [...new Set(matches.map(match => match[1]))]
   }
 
+  // Get all unique tags from all todos
+  const getAllUniqueTags = (): string[] => {
+    const allTags = todos.flatMap(todo => todo.tags || [])
+    return [...new Set(allTags)].sort()
+  }
+
+  // Get all unique mentions from all todos
+  const getAllUniqueMentions = (): string[] => {
+    const allMentions = todos.flatMap(todo => todo.mentions || [])
+    return [...new Set(allMentions)].sort()
+  }
+
   // Detect mobile device changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)')
@@ -72,6 +89,28 @@ function App() {
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
   }, [])
+
+  // Close filter dropdown when clicking outside
+  useEffect(() => {
+    if (!showStatusFilter) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      // Check if click is outside the filter button container
+      if (!target.closest('.filter-btn-container')) {
+        setShowStatusFilter(false)
+      }
+    }
+
+    // Add slight delay to prevent immediate closing when opening
+    setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside)
+    }, 0)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showStatusFilter])
 
   // Keyboard navigation
   useEffect(() => {
@@ -435,8 +474,22 @@ function App() {
   const isAllStatusesChecked = filterStatuses.length === 4
 
   const filteredTodos = todos.filter(todo => {
+    // Status filter
     const statusMatch = filterStatuses.length === 0 || filterStatuses.includes(todo.status)
-    return statusMatch
+    
+    // Tag filter (if any tags selected, todo must have at least one matching tag)
+    const tagMatch = selectedTags.length === 0 || selectedTags.some(tag => (todo.tags || []).includes(tag))
+    
+    // Mention filter (if any mentions selected, todo must have at least one matching mention)
+    const mentionMatch = selectedMentions.length === 0 || selectedMentions.some(mention => (todo.mentions || []).includes(mention))
+    
+    // Search query (searches in task text, tags, and mentions)
+    const searchMatch = searchQuery.trim() === '' || 
+      todo.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (todo.tags || []).some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (todo.mentions || []).some(mention => mention.toLowerCase().includes(searchQuery.toLowerCase()))
+    
+    return statusMatch && tagMatch && mentionMatch && searchMatch
   })
 
   const sortedTodos = [...filteredTodos].sort((a, b) => {
@@ -539,64 +592,130 @@ function App() {
           </label>
         </div>
       </div>
-      <div className="todo-input">
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder="Add a new todo..."
-          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
-        />
-        <button onClick={addTodo}>Add</button>
-      </div>
       
-      <div className="filters">
-        <div className="filter-group">
-          <label>Filter by Status:</label>
-          <div className="status-checkboxes">
-            <label className="checkbox-label all-checkbox">
-              <input 
-                type="checkbox" 
-                checked={isAllStatusesChecked || filterStatuses.length === 0}
-                onChange={toggleAllStatuses}
-              />
-              <span>All</span>
-            </label>
-            <label className="checkbox-label">
-              <input 
-                type="checkbox" 
-                checked={filterStatuses.includes('not started')}
-                onChange={() => toggleStatusFilter('not started')}
-              />
-              <span>Not Started</span>
-            </label>
-            <label className="checkbox-label">
-              <input 
-                type="checkbox" 
-                checked={filterStatuses.includes('in progress')}
-                onChange={() => toggleStatusFilter('in progress')}
-              />
-              <span>In Progress</span>
-            </label>
-            <label className="checkbox-label">
-              <input 
-                type="checkbox" 
-                checked={filterStatuses.includes('on hold')}
-                onChange={() => toggleStatusFilter('on hold')}
-              />
-              <span>On Hold</span>
-            </label>
-            <label className="checkbox-label">
-              <input 
-                type="checkbox" 
-                checked={filterStatuses.includes('completed')}
-                onChange={() => toggleStatusFilter('completed')}
-              />
-              <span>Completed</span>
-            </label>
-          </div>
+      {/* Search and Add Task Row */}
+      <div className="search-add-row">
+        <div className="search-bar">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search tasks, #tags, or @mentions..."
+          />
         </div>
+        <div className="filter-btn-container">
+          <button 
+            onClick={() => setShowStatusFilter(!showStatusFilter)} 
+            className="filter-btn"
+          >
+            Status {filterStatuses.length < 4 && `(${filterStatuses.length})`}
+            <span className={`dropdown-arrow ${showStatusFilter ? 'open' : ''}`}>▼</span>
+          </button>
+          
+          {/* Status Filter Dropdown */}
+          {showStatusFilter && (
+            <div className="filter-dropdown">
+              <label className="filter-option">
+                <input 
+                  type="checkbox" 
+                  checked={filterStatuses.includes('not started')}
+                  onChange={() => toggleStatusFilter('not started')}
+                />
+                <span>Not Started</span>
+              </label>
+              <label className="filter-option">
+                <input 
+                  type="checkbox" 
+                  checked={filterStatuses.includes('in progress')}
+                  onChange={() => toggleStatusFilter('in progress')}
+                />
+                <span>In Progress</span>
+              </label>
+              <label className="filter-option">
+                <input 
+                  type="checkbox" 
+                  checked={filterStatuses.includes('on hold')}
+                  onChange={() => toggleStatusFilter('on hold')}
+                />
+                <span>On Hold</span>
+              </label>
+              <label className="filter-option">
+                <input 
+                  type="checkbox" 
+                  checked={filterStatuses.includes('completed')}
+                  onChange={() => toggleStatusFilter('completed')}
+                />
+                <span>Completed</span>
+              </label>
+              <div className="filter-actions">
+                <button 
+                  onClick={toggleAllStatuses}
+                  className="filter-action-btn"
+                >
+                  Select All
+                </button>
+                <button 
+                  onClick={() => setFilterStatuses([])}
+                  className="filter-action-btn"
+                >
+                  Clear All
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+        <button onClick={() => setShowAddTaskModal(true)} className="add-task-btn">
+          <span>+</span>
+          Add Task
+        </button>
       </div>
+
+      {/* Active Filters */}
+      {(filterStatuses.length > 0 && filterStatuses.length < 4) && (
+        <div className="active-filters">
+          {filterStatuses.map(status => (
+            <span key={status} className="active-filter-chip">
+              {status}
+              <button 
+                onClick={() => toggleStatusFilter(status)}
+                className="remove-filter"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Add Task Modal */}
+      {showAddTaskModal && (
+        <>
+          <div className="overlay" onClick={() => setShowAddTaskModal(false)}></div>
+          <div className="add-task-panel">
+            <h3>Add New Task</h3>
+            <div className="add-task-input-row">
+              <input
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder="What needs to be done?"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    addTodo()
+                    setShowAddTaskModal(false)
+                  }
+                }}
+                autoFocus
+              />
+              <button onClick={() => {
+                addTodo()
+                setShowAddTaskModal(false)
+              }}>Add</button>
+              <button className="cancel" onClick={() => setShowAddTaskModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </>
+      )}
 
       <table className="todo-table">
         <thead>

@@ -1,3 +1,45 @@
+/* ============================================
+   CSS LAYOUT BEST PRACTICES
+   ============================================
+   
+   Keep these principles in mind to avoid layout issues:
+   
+   1. KEEP LAYOUTS SIMPLE
+      - Avoid position: relative unless absolutely necessary for child positioning
+      - Use align-items: center for natural alignment (not stretch)
+      - Don't add width constraints (min-width, max-width) unless solving specific problems
+   
+   2. BOX MODEL CONSISTENCY
+      - Always use box-sizing: border-box on inputs and form elements
+      - This ensures padding and borders are included in width calculations
+      - Prevents unexpected overflow issues
+   
+   3. FLEX LAYOUT BEST PRACTICES
+      - Use flex: 1 for elements that should grow to fill space
+      - Use flex-shrink: 0 for elements that should maintain their size
+      - Use gap instead of margins for spacing between flex items
+      - Avoid mixing position: relative/absolute with flexbox unless necessary
+   
+   4. HEIGHT ALIGNMENT
+      - Use explicit height values for perfect alignment (not fit-content)
+      - Remove vertical padding when using explicit heights
+      - Use line-height: 1 on icons to prevent height interference
+      - Use align-items: center in flex containers for vertical centering
+   
+   5. TROUBLESHOOTING OVERLAP ISSUES
+      - First, simplify: remove unnecessary CSS properties
+      - Check for box-sizing issues
+      - Verify align-items isn't causing stretching
+      - Look for width constraints fighting flexbox
+      - Test if simpler approaches work before adding complexity
+   
+   6. REFERENCE WORKING PATTERNS
+      - When you have a layout that works, document its structure
+      - Before changes, note which CSS properties are essential
+      - When redesigning, try to match proven patterns first
+   
+   ============================================ */
+
 #root {
   max-width: 1200px;
   margin: 0 auto;
@@ -961,4 +1003,466 @@ h1 {
 
 .toggle-auth-btn:hover {
   color: rgba(255, 255, 255, 0.9);
+}
+
+/* Search & Filter UI */
+.search-filter-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-input {
+  padding: 10px 14px;
+  background-color: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-input:focus {
+  border-color: #2196F3;
+  background-color: #1a1a1a;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.filter-chips-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chips-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  min-width: 70px;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-chip {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+  background-color: transparent;
+}
+
+.filter-chip.tag-chip {
+  color: #4CAF50;
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.filter-chip.tag-chip:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
+.filter-chip.tag-chip.active {
+  background-color: rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.filter-chip.mention-chip {
+  color: #2196F3;
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+.filter-chip.mention-chip:hover {
+  background-color: rgba(33, 150, 243, 0.1);
+  border-color: rgba(33, 150, 243, 0.5);
+}
+
+.filter-chip.mention-chip.active {
+  background-color: rgba(33, 150, 243, 0.2);
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+/* Search and Add Task Row */
+.search-add-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.search-bar {
+  flex: 1;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px 14px;
+  background-color: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+  box-sizing: border-box;
+}
+
+.search-bar input:focus {
+  border-color: #2196F3;
+  background-color: #1a1a1a;
+}
+
+.search-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Filter Button Container - needed for dropdown positioning */
+.filter-btn-container {
+  position: relative;
+}
+
+/* Filter Button */
+.filter-btn {
+  padding: 0 16px;
+  background-color: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.filter-btn:hover {
+  background-color: #3a3a3a;
+  border-color: #4a4a4a;
+}
+
+.filter-btn .dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.filter-btn .dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Add Task Button */
+.add-task-btn {
+  padding: 0 20px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.add-task-btn:hover {
+  background-color: #1976D2;
+}
+
+.add-task-btn span {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Filter Dropdown */
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background-color: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 100;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.filter-option:hover {
+  background-color: #2a2a2a;
+}
+
+.filter-option input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #2196F3;
+}
+
+.filter-option span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #3a3a3a;
+}
+
+.filter-action-btn {
+  flex: 1;
+  padding: 6px 12px;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-action-btn:hover {
+  background-color: #2a2a2a;
+  color: rgba(255, 255, 255, 0.87);
+  border-color: #4a4a4a;
+}
+
+/* Active Filters */
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: rgba(33, 150, 243, 0.15);
+  color: #2196F3;
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.remove-filter {
+  background: none;
+  border: none;
+  color: #2196F3;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  margin-left: 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.remove-filter:hover {
+  opacity: 1;
+}
+
+/* Add Task Modal Panel */
+.add-task-panel {
+  position: fixed;
+  top: 10vh;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background-color: #161b22;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 24px;
+  z-index: 1001;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  min-width: 600px;
+  max-width: 700px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.add-task-panel h3 {
+  margin: 0 0 16px 0;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.add-task-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.add-task-input-row input {
+  flex: 1;
+  padding: 12px 16px;
+  background-color: #0d1117;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.add-task-input-row input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.add-task-input-row input:focus {
+  border-color: #2196F3;
+}
+
+.add-task-input-row button {
+  padding: 12px 24px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.add-task-input-row button:hover {
+  background-color: #1976D2;
+}
+
+.add-task-input-row button.cancel {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #3a3a3a;
+  padding: 10px 16px;
+}
+
+.add-task-input-row button.cancel:hover {
+  background-color: #1a1a1a;
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .search-add-row {
+    flex-direction: column;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+
+  .filter-btn,
+  .add-task-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-dropdown {
+    width: 100%;
+  }
+
+  .active-filters {
+    width: 100%;
+  }
+
+  .add-task-panel {
+    top: 20vh;
+    left: 12px;
+    right: 12px;
+    min-width: unset;
+    max-width: unset;
+    transform: none;
+  }
+
+  .add-task-input-row {
+    flex-direction: column;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

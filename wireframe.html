@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rapi.do - Interactive Filter UI Mockup</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background-color: #0d1117;
+      color: rgba(255, 255, 255, 0.87);
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    /* Header Section */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    
+    .app-header h1 {
+      font-size: 28px;
+      color: #2196F3;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background-color: #1a1a1a;
+      border-radius: 6px;
+    }
+    
+    .user-email {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+    }
+    
+    .logout-btn {
+      padding: 6px 12px;
+      background-color: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid #3a3a3a;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.2s;
+    }
+    
+    .logout-btn:hover {
+      background-color: #252525;
+    }
+    
+    .view-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background-color: #1a1a1a;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .toggle-switch {
+      width: 48px;
+      height: 24px;
+      background-color: #3a3a3a;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background-color: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: 0.3s;
+    }
+    
+    /* Search and Add Task Row */
+    .search-add-row {
+      position: relative;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: stretch;
+    }
+    
+    .search-bar {
+      position: relative;
+      flex: 1;
+    }
+    
+    .search-bar input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background-color: #161b22;
+      color: rgba(255, 255, 255, 0.87);
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .search-bar input:focus {
+      border-color: #2196F3;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 18px;
+    }
+    
+    .add-task-btn {
+      padding: 12px 24px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .add-task-btn:hover {
+      background-color: #1976D2;
+    }
+    
+    .add-task-btn.open {
+      background-color: #1976D2;
+    }
+    
+    /* Add Task Input Panel - Centered Overlay with responsive vertical positioning */
+    .add-task-panel {
+      position: fixed;
+      top: 10vh; /* 10% of viewport height - adjusts to screen size */
+      left: 50%;
+      transform: translate(-50%, 0);
+      background-color: #161b22;
+      border: 1px solid #3a3a3a;
+      border-radius: 8px;
+      padding: 24px;
+      display: none;
+      z-index: 1001;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      min-width: 600px;
+      max-width: 700px;
+    }
+    
+    .add-task-panel.visible {
+      display: block;
+      animation: slideFromRight 0.2s ease-out;
+    }
+    
+    @keyframes slideFromRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    /* Make search-add-row a positioning context */
+    .search-add-row {
+      position: relative;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .add-task-input-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .add-task-input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      background-color: #0d1117;
+      color: rgba(255, 255, 255, 0.87);
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+      min-width: 300px;
+    }
+    
+    .add-task-input-row input:focus {
+      border-color: #2196F3;
+    }
+    
+    .add-task-input-row button {
+      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+    
+    .add-task-input-row button:hover {
+      background-color: #1976D2;
+    }
+    
+    .add-task-input-row button.cancel {
+      background-color: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid #3a3a3a;
+      padding: 10px 16px;
+    }
+    
+    .add-task-input-row button.cancel:hover {
+      background-color: #1a1a1a;
+    }
+    
+    /* Filter Buttons Row */
+    .filter-buttons-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .filter-btn {
+      position: relative;
+      padding: 10px 16px;
+      background-color: #161b22;
+      color: rgba(255, 255, 255, 0.87);
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .filter-btn:hover {
+      background-color: #1a1a1a;
+      border-color: #3a3a3a;
+    }
+    
+    .filter-btn.active {
+      background-color: #1a1a1a;
+      border-color: #2196F3;
+    }
+    
+    .filter-icon {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .filter-badge {
+      background-color: #2196F3;
+      color: white;
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-out;
+    }
+    
+    .modal-overlay.visible {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* Modal Panel - Dropdown Style */
+    .modal-panel {
+      position: absolute;
+      background-color: #161b22;
+      border: 1px solid #3a3a3a;
+      border-radius: 8px;
+      padding: 20px;
+      min-width: 320px;
+      max-width: 400px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1001;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      animation: dropdownSlide 0.15s ease-out;
+    }
+    
+    @keyframes dropdownSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.87);
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    
+    .modal-close:hover {
+      background-color: #252525;
+    }
+    
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background-color: #0d1117;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+    
+    .checkbox-item:hover {
+      background-color: #1a1a1a;
+      border-color: #3a3a3a;
+    }
+    
+    .checkbox-item input {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      accent-color: #2196F3;
+    }
+    
+    .modal-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .modal-chip {
+      padding: 8px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid;
+      background-color: transparent;
+    }
+    
+    .modal-chip.tag {
+      color: #4CAF50;
+      border-color: rgba(76, 175, 80, 0.3);
+    }
+    
+    .modal-chip.tag:hover {
+      background-color: rgba(76, 175, 80, 0.1);
+    }
+    
+    .modal-chip.tag.selected {
+      background-color: rgba(76, 175, 80, 0.2);
+      border-color: #4CAF50;
+    }
+    
+    .modal-chip.mention {
+      color: #2196F3;
+      border-color: rgba(33, 150, 243, 0.3);
+    }
+    
+    .modal-chip.mention:hover {
+      background-color: rgba(33, 150, 243, 0.1);
+    }
+    
+    .modal-chip.mention.selected {
+      background-color: rgba(33, 150, 243, 0.2);
+      border-color: #2196F3;
+    }
+    
+    /* Active Filters Row - Single Horizontal Row */
+    .active-filters-row {
+      display: none;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background-color: #161b22;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .active-filters-row.visible {
+      display: flex;
+      animation: slideDown 0.2s ease-out;
+    }
+    
+    .active-filters-row::-webkit-scrollbar {
+      height: 6px;
+    }
+    
+    .active-filters-row::-webkit-scrollbar-track {
+      background: #0d1117;
+      border-radius: 3px;
+    }
+    
+    .active-filters-row::-webkit-scrollbar-thumb {
+      background: #3a3a3a;
+      border-radius: 3px;
+    }
+    
+    .active-filters-row::-webkit-scrollbar-thumb:hover {
+      background: #4a4a4a;
+    }
+    
+    /* Active filters container - horizontal layout */
+    #activeFiltersContainer {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+    
+    .clear-filters-btn {
+      padding: 6px 14px;
+      background-color: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .clear-filters-btn:hover {
+      background-color: #1a1a1a;
+      color: rgba(255, 255, 255, 0.87);
+      border-color: #4a4a4a;
+    }
+    
+    .active-filter-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .active-filter-item.status {
+      background-color: rgba(156, 39, 176, 0.15);
+      color: #CE93D8;
+      border-color: rgba(156, 39, 176, 0.3);
+    }
+    
+    .active-filter-item.tag {
+      background-color: rgba(76, 175, 80, 0.15);
+      color: #4CAF50;
+      border-color: rgba(76, 175, 80, 0.3);
+    }
+    
+    .active-filter-item.mention {
+      background-color: rgba(33, 150, 243, 0.15);
+      color: #2196F3;
+      border-color: rgba(33, 150, 243, 0.3);
+    }
+    
+    .remove-filter {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 0;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    
+    .remove-filter:hover {
+      opacity: 1;
+    }
+    
+    /* Table Preview */
+    .table-container {
+      background-color: #161b22;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    .table-placeholder {
+      padding: 60px 40px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.4);
+      border: 2px dashed #2a2a2a;
+      border-radius: 6px;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      
+      .header-right {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-add-row {
+        flex-direction: column;
+      }
+      
+      .add-task-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .add-task-input-row {
+        flex-direction: column;
+      }
+      
+      .filter-buttons-row {
+        flex-wrap: wrap;
+      }
+      
+      .modal-panel {
+        min-width: 90%;
+        max-width: 90%;
+      }
+    }
+    
+    /* Instructions */
+    .instructions {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #1a1a1a;
+      border-left: 3px solid #2196F3;
+      border-radius: 4px;
+    }
+    
+    .instructions h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: #2196F3;
+    }
+    
+    .instructions ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    
+    .instructions li {
+      padding: 6px 0;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+    }
+    
+    .instructions li::before {
+      content: "▸ ";
+      color: #2196F3;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>rapi.do</h1>
+      <div class="header-right">
+        <div class="user-info">
+          <span class="user-email">user@example.com</span>
+          <button class="logout-btn">Sign Out</button>
+        </div>
+        <div class="view-toggle">
+          <span>Simple View</span>
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Search and Add Task Row -->
+    <div class="search-add-row">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search tasks, #tags, or @mentions..." id="searchInput">
+      </div>
+      <button class="add-task-btn" id="addTaskToggle">
+        <span>+</span>
+        <span>Add task</span>
+      </button>
+    </div>
+    
+    <!-- Add Task Input Panel (Hidden by default) -->
+    <div class="add-task-panel" id="addTaskPanel">
+      <div class="add-task-input-row">
+        <input type="text" placeholder="What needs to be done? Use #tags and @mentions..." id="taskInput">
+        <button onclick="addTask()">Add</button>
+        <button class="cancel" onclick="toggleAddTask()">Cancel</button>
+      </div>
+    </div>
+    
+    <!-- Filter Buttons Row -->
+    <div class="filter-buttons-row">
+      <button class="filter-btn" id="statusFilterBtn" onclick="openModal('status')">
+        <span class="filter-icon">⚡</span>
+        <span>Status</span>
+        <span class="filter-badge" id="statusBadge" style="display: none;"></span>
+      </button>
+      <button class="filter-btn" id="tagsFilterBtn" onclick="openModal('tags')">
+        <span class="filter-icon">#</span>
+        <span>Tags</span>
+        <span class="filter-badge" id="tagsBadge" style="display: none;"></span>
+      </button>
+      <button class="filter-btn" id="mentionsFilterBtn" onclick="openModal('mentions')">
+        <span class="filter-icon">@</span>
+        <span>Mentions</span>
+        <span class="filter-badge" id="mentionsBadge" style="display: none;"></span>
+      </button>
+    </div>
+    
+    <!-- Active Filters Row (Hidden when no filters) -->
+    <div class="active-filters-row" id="activeFiltersRow">
+      <button class="clear-filters-btn" onclick="clearAllFilters()">Clear filters</button>
+      <div id="activeFiltersContainer"></div>
+    </div>
+    
+    <!-- Table Section -->
+    <section class="table-container">
+      <div class="table-placeholder">
+        📋 Todo Table Goes Here<br>
+        <small>(Task list with drag & drop, inline editing, etc.)</small>
+      </div>
+    </section>
+    
+    <!-- Instructions -->
+    <section class="instructions">
+      <h3>🎯 Interactive Demo - Try It Out!</h3>
+      <ul>
+        <li><strong>Click "+ Add task"</strong> to open task input overlay (centered on screen)</li>
+        <li><strong>Click "Status", "Tags", or "Mentions"</strong> to open dropdown filters (positioned under each button)</li>
+        <li><strong>Select filters</strong> to see them appear in a horizontal active filters row</li>
+        <li><strong>Click "×"</strong> on any active filter to remove it individually</li>
+        <li><strong>Click "Clear filters"</strong> to remove all filters at once</li>
+        <li><strong>Press Escape</strong> or click the overlay to close modals/panels</li>
+        <li><strong>Notice:</strong> Active filters displayed in single row (scrollable if many filters)</li>
+      </ul>
+    </section>
+  </div>
+  
+  <!-- Modal Overlay -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick()"></div>
+  
+  <!-- Status Filter Modal -->
+  <div class="modal-panel" id="statusModal" style="display: none;">
+    <div class="modal-header">
+      <div class="modal-title">Filter by Status</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-content">
+      <label class="checkbox-item">
+        <input type="checkbox" value="not-started" onchange="updateStatusFilter(this)">
+        <span>Not Started</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" value="in-progress" onchange="updateStatusFilter(this)">
+        <span>In Progress</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" value="on-hold" onchange="updateStatusFilter(this)">
+        <span>On Hold</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" value="completed" onchange="updateStatusFilter(this)">
+        <span>Completed</span>
+      </label>
+    </div>
+  </div>
+  
+  <!-- Tags Filter Modal -->
+  <div class="modal-panel" id="tagsModal" style="display: none;">
+    <div class="modal-header">
+      <div class="modal-title">Filter by Tags</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-content">
+      <div class="modal-chip-list">
+        <button class="modal-chip tag" onclick="toggleTag(this, 'urgent')">#urgent</button>
+        <button class="modal-chip tag" onclick="toggleTag(this, 'bug')">#bug</button>
+        <button class="modal-chip tag" onclick="toggleTag(this, 'feature')">#feature</button>
+        <button class="modal-chip tag" onclick="toggleTag(this, 'design')">#design</button>
+        <button class="modal-chip tag" onclick="toggleTag(this, 'documentation')">#documentation</button>
+        <button class="modal-chip tag" onclick="toggleTag(this, 'testing')">#testing</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mentions Filter Modal -->
+  <div class="modal-panel" id="mentionsModal" style="display: none;">
+    <div class="modal-header">
+      <div class="modal-title">Filter by Mentions</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-content">
+      <div class="modal-chip-list">
+        <button class="modal-chip mention" onclick="toggleMention(this, 'john')">@john</button>
+        <button class="modal-chip mention" onclick="toggleMention(this, 'sarah')">@sarah</button>
+        <button class="modal-chip mention" onclick="toggleMention(this, 'team')">@team</button>
+        <button class="modal-chip mention" onclick="toggleMention(this, 'design')">@design</button>
+        <button class="modal-chip mention" onclick="toggleMention(this, 'dev')">@dev</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // State
+    const state = {
+      statuses: [],
+      tags: [],
+      mentions: []
+    };
+    
+    // Toggle Add Task Panel
+    function toggleAddTask() {
+      const panel = document.getElementById('addTaskPanel');
+      const btn = document.getElementById('addTaskToggle');
+      const overlay = document.getElementById('modalOverlay');
+      
+      if (panel.classList.contains('visible')) {
+        panel.classList.remove('visible');
+        btn.classList.remove('open');
+        overlay.classList.remove('visible');
+      } else {
+        panel.classList.add('visible');
+        btn.classList.add('open');
+        overlay.classList.add('visible');
+        document.getElementById('taskInput').focus();
+      }
+    }
+    
+    document.getElementById('addTaskToggle').addEventListener('click', toggleAddTask);
+    
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      if (input.value.trim()) {
+        alert('Task added: ' + input.value);
+        input.value = '';
+        toggleAddTask();
+      }
+    }
+    
+    // Close add task panel on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const panel = document.getElementById('addTaskPanel');
+        if (panel.classList.contains('visible')) {
+          toggleAddTask();
+        } else if (currentModal) {
+          closeModal();
+        }
+      }
+    });
+    
+    // Modal Management
+    let currentModal = null;
+    
+    function openModal(type) {
+      closeModal();
+      const overlay = document.getElementById('modalOverlay');
+      const modal = document.getElementById(type + 'Modal');
+      const button = document.getElementById(type + 'FilterBtn');
+      
+      // Position dropdown under the button
+      const buttonRect = button.getBoundingClientRect();
+      modal.style.position = 'absolute';
+      modal.style.top = (buttonRect.bottom + window.scrollY + 8) + 'px';
+      modal.style.left = (buttonRect.left + window.scrollX) + 'px';
+      
+      overlay.classList.add('visible');
+      modal.style.display = 'block';
+      currentModal = type;
+      
+      // Mark button as active
+      button.classList.add('active');
+    }
+    
+    function closeModal() {
+      const overlay = document.getElementById('modalOverlay');
+      overlay.classList.remove('visible');
+      
+      if (currentModal) {
+        const modal = document.getElementById(currentModal + 'Modal');
+        modal.style.display = 'none';
+        document.getElementById(currentModal + 'FilterBtn').classList.remove('active');
+        currentModal = null;
+      }
+    }
+    
+    // Handle overlay click to close modals or add task panel
+    function handleOverlayClick() {
+      const panel = document.getElementById('addTaskPanel');
+      if (panel.classList.contains('visible')) {
+        toggleAddTask();
+      } else {
+        closeModal();
+      }
+    }
+    
+    // Filter Updates
+    function updateStatusFilter(checkbox) {
+      const value = checkbox.value;
+      if (checkbox.checked) {
+        if (!state.statuses.includes(value)) {
+          state.statuses.push(value);
+        }
+      } else {
+        state.statuses = state.statuses.filter(s => s !== value);
+      }
+      updateActiveFilters();
+    }
+    
+    function toggleTag(button, tag) {
+      button.classList.toggle('selected');
+      if (button.classList.contains('selected')) {
+        if (!state.tags.includes(tag)) {
+          state.tags.push(tag);
+        }
+      } else {
+        state.tags = state.tags.filter(t => t !== tag);
+      }
+      updateActiveFilters();
+    }
+    
+    function toggleMention(button, mention) {
+      button.classList.toggle('selected');
+      if (button.classList.contains('selected')) {
+        if (!state.mentions.includes(mention)) {
+          state.mentions.push(mention);
+        }
+      } else {
+        state.mentions = state.mentions.filter(m => m !== mention);
+      }
+      updateActiveFilters();
+    }
+    
+    function removeFilter(type, value) {
+      if (type === 'status') {
+        state.statuses = state.statuses.filter(s => s !== value);
+        const checkbox = document.querySelector(`#statusModal input[value="${value}"]`);
+        if (checkbox) checkbox.checked = false;
+      } else if (type === 'tag') {
+        state.tags = state.tags.filter(t => t !== value);
+        const buttons = document.querySelectorAll('#tagsModal .modal-chip.tag');
+        buttons.forEach(btn => {
+          if (btn.textContent.includes(value)) {
+            btn.classList.remove('selected');
+          }
+        });
+      } else if (type === 'mention') {
+        state.mentions = state.mentions.filter(m => m !== value);
+        const buttons = document.querySelectorAll('#mentionsModal .modal-chip.mention');
+        buttons.forEach(btn => {
+          if (btn.textContent.includes(value)) {
+            btn.classList.remove('selected');
+          }
+        });
+      }
+      updateActiveFilters();
+    }
+    
+    function clearAllFilters() {
+      state.statuses = [];
+      state.tags = [];
+      state.mentions = [];
+      
+      // Clear UI
+      document.querySelectorAll('#statusModal input').forEach(cb => cb.checked = false);
+      document.querySelectorAll('#tagsModal .modal-chip').forEach(btn => btn.classList.remove('selected'));
+      document.querySelectorAll('#mentionsModal .modal-chip').forEach(btn => btn.classList.remove('selected'));
+      
+      updateActiveFilters();
+    }
+    
+    function updateActiveFilters() {
+      const container = document.getElementById('activeFiltersContainer');
+      const row = document.getElementById('activeFiltersRow');
+      
+      const totalFilters = state.statuses.length + state.tags.length + state.mentions.length;
+      
+      if (totalFilters === 0) {
+        row.classList.remove('visible');
+        return;
+      }
+      
+      row.classList.add('visible');
+      container.innerHTML = '';
+      
+      // Add status filters
+      state.statuses.forEach(status => {
+        const chip = document.createElement('div');
+        chip.className = 'active-filter-item status';
+        chip.innerHTML = `
+          <span>${status.replace('-', ' ')}</span>
+          <button class="remove-filter" onclick="removeFilter('status', '${status}')">×</button>
+        `;
+        container.appendChild(chip);
+      });
+      
+      // Add tag filters
+      state.tags.forEach(tag => {
+        const chip = document.createElement('div');
+        chip.className = 'active-filter-item tag';
+        chip.innerHTML = `
+          <span>#${tag}</span>
+          <button class="remove-filter" onclick="removeFilter('tag', '${tag}')">×</button>
+        `;
+        container.appendChild(chip);
+      });
+      
+      // Add mention filters
+      state.mentions.forEach(mention => {
+        const chip = document.createElement('div');
+        chip.className = 'active-filter-item mention';
+        chip.innerHTML = `
+          <span>@${mention}</span>
+          <button class="remove-filter" onclick="removeFilter('mention', '${mention}')">×</button>
+        `;
+        container.appendChild(chip);
+      });
+      
+      // Update badges
+      updateBadges();
+    }
+    
+    function updateBadges() {
+      const statusBadge = document.getElementById('statusBadge');
+      const tagsBadge = document.getElementById('tagsBadge');
+      const mentionsBadge = document.getElementById('mentionsBadge');
+      
+      // Always update badge display and content
+      if (state.statuses.length > 0) {
+        statusBadge.textContent = state.statuses.length;
+        statusBadge.style.display = 'inline-block';
+      } else {
+        statusBadge.textContent = '';
+        statusBadge.style.display = 'none';
+      }
+      
+      if (state.tags.length > 0) {
+        tagsBadge.textContent = state.tags.length;
+        tagsBadge.style.display = 'inline-block';
+      } else {
+        tagsBadge.textContent = '';
+        tagsBadge.style.display = 'none';
+      }
+      
+      if (state.mentions.length > 0) {
+        mentionsBadge.textContent = state.mentions.length;
+        mentionsBadge.style.display = 'inline-block';
+      } else {
+        mentionsBadge.textContent = '';
+        mentionsBadge.style.display = 'none';
+      }
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        if (document.getElementById('addTaskPanel').classList.contains('visible')) {
+          toggleAddTask();
+        }
+      }
+    });
+    
+    // Enter key on task input
+    document.getElementById('taskInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        addTask();
+      }
+    });
+  </script>
+</body>
+</html>
