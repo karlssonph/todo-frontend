@@ -115,6 +115,13 @@ function App() {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for ESC key to close Add Task modal first
+      if (e.key === 'Escape' && showAddTaskModal) {
+        e.preventDefault()
+        setShowAddTaskModal(false)
+        return
+      }
+      
       // Don't handle keyboard shortcuts when editing or on mobile
       if (editingTaskId !== null || isMobile) return
       
@@ -190,7 +197,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedTaskIndex, editingTaskId, todos, filterStatuses, isMobile])
+  }, [selectedTaskIndex, editingTaskId, todos, filterStatuses, isMobile, showAddTaskModal])
 
   // Load todos from Firestore
   useEffect(() => {
@@ -463,11 +470,11 @@ function App() {
 
   const toggleAllStatuses = () => {
     const allStatuses: TodoStatus[] = ['not started', 'in progress', 'on hold', 'completed']
-    // If all are checked or none are checked, do nothing (keep showing all)
-    if (filterStatuses.length === 0 || filterStatuses.length === allStatuses.length) {
+    // If all are already checked, do nothing (they're all selected)
+    if (filterStatuses.length === allStatuses.length) {
       return
     }
-    // If some are checked, select all
+    // Otherwise (whether none or some are checked), select all
     setFilterStatuses(allStatuses)
   }
 
@@ -574,153 +581,160 @@ function App() {
   return (
     <div className="App">
       <div className="app-header">
-        <h1>rapi.do</h1>
-        <div className="header-right">
-          <div className="user-info">
-            <span className="user-name">{user.email}</span>
-            <button onClick={logout} className="logout-btn">Sign Out</button>
-          </div>
-          <label className="view-toggle">
-            <span>Simple View</span>
-            <input
-              type="checkbox"
-              checked={isSimpleView}
-              onChange={toggleSimpleView}
-              className="toggle-checkbox"
-            />
-            <span className="toggle-switch"></span>
-          </label>
-        </div>
-      </div>
-      
-      {/* Search and Add Task Row */}
-      <div className="search-add-row">
-        <div className="search-bar">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tasks, #tags, or @mentions..."
-          />
-        </div>
-        <div className="filter-btn-container">
-          <button 
-            onClick={() => setShowStatusFilter(!showStatusFilter)} 
-            className="filter-btn"
-          >
-            Status {filterStatuses.length < 4 && `(${filterStatuses.length})`}
-            <span className={`dropdown-arrow ${showStatusFilter ? 'open' : ''}`}>▼</span>
-          </button>
-          
-          {/* Status Filter Dropdown */}
-          {showStatusFilter && (
-            <div className="filter-dropdown">
-              <label className="filter-option">
-                <input 
-                  type="checkbox" 
-                  checked={filterStatuses.includes('not started')}
-                  onChange={() => toggleStatusFilter('not started')}
-                />
-                <span>Not Started</span>
-              </label>
-              <label className="filter-option">
-                <input 
-                  type="checkbox" 
-                  checked={filterStatuses.includes('in progress')}
-                  onChange={() => toggleStatusFilter('in progress')}
-                />
-                <span>In Progress</span>
-              </label>
-              <label className="filter-option">
-                <input 
-                  type="checkbox" 
-                  checked={filterStatuses.includes('on hold')}
-                  onChange={() => toggleStatusFilter('on hold')}
-                />
-                <span>On Hold</span>
-              </label>
-              <label className="filter-option">
-                <input 
-                  type="checkbox" 
-                  checked={filterStatuses.includes('completed')}
-                  onChange={() => toggleStatusFilter('completed')}
-                />
-                <span>Completed</span>
-              </label>
-              <div className="filter-actions">
-                <button 
-                  onClick={toggleAllStatuses}
-                  className="filter-action-btn"
-                >
-                  Select All
-                </button>
-                <button 
-                  onClick={() => setFilterStatuses([])}
-                  className="filter-action-btn"
-                >
-                  Clear All
-                </button>
-              </div>
+        <div className="header-content">
+          <h1>rapi.do</h1>
+          <div className="header-right">
+            <div className="user-info">
+              <span className="user-name">{user.email}</span>
+              <button onClick={logout} className="logout-btn">Sign Out</button>
             </div>
-          )}
+            <label className="view-toggle">
+              <span>Simple View</span>
+              <input
+                type="checkbox"
+                checked={isSimpleView}
+                onChange={toggleSimpleView}
+                className="toggle-checkbox"
+              />
+              <span className="toggle-switch"></span>
+            </label>
+          </div>
         </div>
-        <button onClick={() => setShowAddTaskModal(true)} className="add-task-btn">
-          <span>+</span>
-          Add Task
-        </button>
-      </div>
 
-      {/* Active Filters */}
-      {(filterStatuses.length > 0 && filterStatuses.length < 4) && (
-        <div className="active-filters">
-          {filterStatuses.map(status => (
-            <span key={status} className="active-filter-chip">
-              {status}
-              <button 
-                onClick={() => toggleStatusFilter(status)}
-                className="remove-filter"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Add Task Modal */}
-      {showAddTaskModal && (
-        <>
-          <div className="overlay" onClick={() => setShowAddTaskModal(false)}></div>
-          <div className="add-task-panel">
-            <h3>Add New Task</h3>
-            <div className="add-task-input-row">
+        {/* Search and Add Task Row */}
+        <div className="header-content">
+          <div className="search-add-row">
+            <div className="search-bar">
               <input
                 type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="What needs to be done?"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    addTodo()
-                    setShowAddTaskModal(false)
-                  }
-                }}
-                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search tasks, #tags, or @mentions..."
               />
-              <button onClick={() => {
-                addTodo()
-                setShowAddTaskModal(false)
-              }}>Add</button>
-              <button className="cancel" onClick={() => setShowAddTaskModal(false)}>Cancel</button>
+            </div>
+            <div className="filter-btn-container">
+              <button 
+                onClick={() => setShowStatusFilter(!showStatusFilter)} 
+                className="filter-btn"
+              >
+                Status {filterStatuses.length < 4 && `(${filterStatuses.length})`}
+                <span className={`dropdown-arrow ${showStatusFilter ? 'open' : ''}`}>▼</span>
+              </button>
+              
+              {/* Status Filter Dropdown */}
+              {showStatusFilter && (
+                <div className="filter-dropdown">
+                  <label className="filter-option">
+                    <input 
+                      type="checkbox" 
+                      checked={filterStatuses.includes('not started')}
+                      onChange={() => toggleStatusFilter('not started')}
+                    />
+                    <span>Not Started</span>
+                  </label>
+                  <label className="filter-option">
+                    <input 
+                      type="checkbox" 
+                      checked={filterStatuses.includes('in progress')}
+                      onChange={() => toggleStatusFilter('in progress')}
+                    />
+                    <span>In Progress</span>
+                  </label>
+                  <label className="filter-option">
+                    <input 
+                      type="checkbox" 
+                      checked={filterStatuses.includes('on hold')}
+                      onChange={() => toggleStatusFilter('on hold')}
+                    />
+                    <span>On Hold</span>
+                  </label>
+                  <label className="filter-option">
+                    <input 
+                      type="checkbox" 
+                      checked={filterStatuses.includes('completed')}
+                      onChange={() => toggleStatusFilter('completed')}
+                    />
+                    <span>Completed</span>
+                  </label>
+                  <div className="filter-actions">
+                    <button 
+                      onClick={toggleAllStatuses}
+                      className="filter-action-btn"
+                    >
+                      Select All
+                    </button>
+                    <button 
+                      onClick={() => setFilterStatuses([])}
+                      className="filter-action-btn"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <button onClick={() => setShowAddTaskModal(true)} className="add-task-btn">
+              <span>+</span>
+              Add Task
+            </button>
+          </div>
+        </div>
+
+        {/* Active Filters */}
+        {(filterStatuses.length > 0 && filterStatuses.length < 4) && (
+          <div className="header-content">
+            <div className="active-filters">
+              {filterStatuses.map(status => (
+                <span key={status} className="active-filter-chip">
+                  {status}
+                  <button 
+                    onClick={() => toggleStatusFilter(status)}
+                    className="remove-filter"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
             </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
+      
+      <div className="content-wrapper">
+        {/* Add Task Modal */}
+        {showAddTaskModal && (
+          <>
+            <div className="overlay" onClick={() => setShowAddTaskModal(false)}></div>
+            <div className="add-task-panel">
+              <h3>Add New Task</h3>
+              <div className="add-task-input-row">
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="What needs to be done?"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      addTodo()
+                      setShowAddTaskModal(false)
+                    }
+                  }}
+                  autoFocus
+                />
+                <button onClick={() => {
+                  addTodo()
+                  setShowAddTaskModal(false)
+                }}>Add</button>
+                <button className="cancel" onClick={() => setShowAddTaskModal(false)}>Cancel</button>
+              </div>
+            </div>
+          </>
+        )}
 
       <table className="todo-table">
         <thead>
           <tr>
-            <th className="checkbox-column"></th>
+              <th className="checkbox-column"></th>
             <th>Task</th>
             {!isSimpleView && (
               <>
@@ -911,6 +925,7 @@ function App() {
       {todos.length === 0 && (
         <p className="no-results">No tasks yet. Add one to get started!</p>
       )}
+      </div> {/* end content-wrapper */}
     </div>
   )
 }
